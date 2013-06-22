@@ -1,0 +1,1 @@
+javadoc -doclet com.innoxyz.javadoc.InnoxyzDoclet -docletpath target\innodoc-1.0-SNAPSHOT-jar-with-dependencies.jar -sourcepath src\test\java -classpath target\test-classes com.innoxyz.tests

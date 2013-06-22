@@ -1,0 +1,7 @@
+<div id="namespace_$namespace">
+	<ul>
+		#foreach( $apiHTML in $apiHTMLs)
+			$apiHTML
+		#end
+	</ul>
+</div>

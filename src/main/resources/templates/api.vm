@@ -1,0 +1,18 @@
+#foreach ($api in $apis)
+<li id="api_$api.name">
+    <span>${api.name}</span>
+    <span>${api.fullPath}</span>
+	<div class="comment_block">
+		<p>
+		${api.block}
+        </p>
+	</div>
+    <ul class="params_list">
+		#foreach ( $param in ${api.params})
+            <li>
+				${param.name}:${param.tp} ${param.required}
+            </li>
+		#end
+    </ul>
+</li>
+#end
