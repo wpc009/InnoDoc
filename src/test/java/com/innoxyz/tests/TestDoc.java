@@ -19,7 +19,7 @@ public class TestDoc {
 	 * @api
 	 * @required id blablablabla
 	 * @optional name blablablablalbla
-	 * @return {
+	 * @result {
 	 *  data: @com.innoxyz.others.Data true 测试数据
 	 * }
 	 *

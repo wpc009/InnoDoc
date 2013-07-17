@@ -31,7 +31,10 @@ object InnoxyzDoclet extends Doclet {
     )
 
     val dataModelCache = new util.HashMap[Class[_ <: Object],String]
-
+    def isPrimitiveClass(c:Class[_ <:Object]):Boolean = {
+        if(classOf[Number].isAssignableFrom(c)||classOf[String].isAssignableFrom(c)||classOf[Boolean].isAssignableFrom(c))true
+        else false
+    }
     vproperties.load(getClass.getClassLoader.getResourceAsStream("velocity.properties"))
     Velocity.init(vproperties)
 
@@ -123,16 +126,21 @@ object InnoxyzDoclet extends Doclet {
 
     def parseClass(doc: ClassDoc) {
         println(s"processing ${doc.qualifiedName()}")
-        val fields = doc.fields()
+
         val filedsMap = new util.HashMap[String, String]
-        fields.foreach {
-            f =>
-            //                println(s"${f.name()}:${f.`type`()}")
-                filedsMap.put(f.name(), f.`type`().simpleTypeName())
+        var classDoc = doc;
+        while(classDoc != null){
+            classDoc.fields().foreach {
+                f =>
+                //                println(s"${f.name()}:${f.`type`()}")
+                    filedsMap.put(f.name(), f.`type`().simpleTypeName())
+            }
+            classDoc = classDoc.superclass()
         }
+
         val apis = new util.ArrayList[APIElem]
         val namespaceMap = new util.HashMap[String,util.ArrayList[APIElem]]()
-        val returnElems = new util.ArrayList[ReturnElem]()
+        val resultElems = new util.ArrayList[ResultElem]()
         if (!doc.qualifiedName().startsWith(options.rootPackage)) {
             logger.error(s"wrong doc ${doc.qualifiedName()}")
             return
@@ -149,11 +157,11 @@ object InnoxyzDoclet extends Doclet {
             s"$path/"
         }
         doc.methods().filter(mDoc => {
-            val apiTag = mDoc.tags("@api")
+            val apiTag = mDoc.tags(APIElem.tagName)
             apiTag != null && apiTag.length > 0
         }) foreach {
             mDoc =>
-                val api = mDoc.tags("@api")
+                val api = mDoc.tags(APIElem.tagName)
 
                 val actionName = if (mDoc.annotations().length > 0 && mDoc.annotations()(0).annotationType()
                     .simpleTypeName()
@@ -182,9 +190,9 @@ object InnoxyzDoclet extends Doclet {
                     }
                     result.toString()
                 }
-                val requires = Some(mDoc.tags("@required"))
-                val optionals = Some(mDoc.tags("@optional"))
-                val returns = Some(mDoc.tags("@return"))
+                val requires = Some(mDoc.tags(ParamElem.requireName))
+                val optionals = Some(mDoc.tags(ParamElem.optionName))
+                val returns = Some(mDoc.tags(ResultElem.tagName))
                 val params: util.List[ParamElem] = new util.ArrayList[ParamElem]
 
                 val parseParam = (r: Tag, required: Boolean) => {
@@ -204,20 +212,45 @@ object InnoxyzDoclet extends Doclet {
 
                 requires.getOrElse(emptyTagArray).foreach(parseParam(_, true))
                 optionals.getOrElse(emptyTagArray).foreach(parseParam(_, false))
-                val ReturnsFormat = """[\s]*([\w]+)[\s]*:[\s]*([^, ]+) ([^, ]+) ([^,}]+)(?:,)?""".r
-                val TypeFormat = """@((?:[\w]+[.])*[\w]+)(?:\[@((?:[\w]+[.])*[\w]+)\])?""".r
+//                val ReturnsFormat = """[\s]*([\w]+)[\s]*:[\s]*([^, ]+) ([^, ]+) ([^,}]+)(?:,)?""".r
+                val TypeFormat = """@((?:[\w]+[.])*[\w]+)""".r
 
 
                 returns.getOrElse(emptyTagArray).foreach( returnTag => {
-                    ReturnsFormat.findAllMatchIn(returnTag.text()).foreach{ r =>
-                        val name = r.group(2)
-                        val sample = name match {
-                            case TypeFormat(name,paramType) =>
-                                val clazz = Class.forName(name).asInstanceOf[Class[_ <: Object]]
+
+                    val text = TypeFormat.replaceAllIn(returnTag.text(), m =>{
+                        logger.debug(s"groups:${m.groupCount}")
+                        try{
+                            val className = m.group(1)
+                            val clazz = Class.forName(className).asInstanceOf[Class[_ <: Object]]
+                            if(isPrimitiveClass(clazz)){
+                                clazz.getSimpleName
+                            }else
                                 dataModelToJSON(clazz)
+                        }catch {
+                            case e:IllegalArgumentException =>
+                                logger.error(s"wrong type format at ${mDoc.position().toString}")
+                                m.group(0)
+                            case e:ClassNotFoundException =>
+                                logger.error(s"Class ${m.group(1)} not in the classpath")
+                                m.group(1)
+                            case e:Exception =>
+                                logger.error(s"""illegal "@xxx.xxx.xxx" class reference at:${mDoc.position()}""")
+                                m.group(1)
                         }
-                        returnElems += new ReturnElem(r.group(1),r.group(2),r.group(3).toBoolean,r.group(4),sample)
-                    }
+                    })
+
+
+                    resultElems += new ResultElem(text)
+//                    ReturnsFormat.findAllMatchIn(returnTag.text()).foreach{ r =>
+//                        val name = r.group(2)
+//                        val sample = name match {
+//                            case TypeFormat(name) =>
+//                                val clazz = Class.forName(name).asInstanceOf[Class[_ <: Object]]
+//                                dataModelToJSON(clazz)
+//                        }
+//                        resultElems += new ResultElem(r.group(1),r.group(2),r.group(3).toBoolean,r.group(4),sample)
+//                    }
                 })
                 namespaceMap.getOrElse(namespace, {
                     val apilist = new util.ArrayList[APIElem]()
@@ -229,7 +262,7 @@ object InnoxyzDoclet extends Doclet {
 
         context.put("path", s"${namespace}")
         context.put("apiMap", namespaceMap.entrySet())
-        context.put("returns",returnElems)
+        context.put("returns",resultElems)
         apis.foreach(api => println(s"${api.name}:${api.describe}"))
         val builder = new StringWriter()
         Velocity.mergeTemplate("templates/api.vm", "utf-8", context, builder)
@@ -249,6 +282,8 @@ object InnoxyzDoclet extends Doclet {
 
     def renderToSingleFile() {
         val context = new VelocityContext()
+        val file = new File("docs/allInOne.html")
+        if(!file.exists())file.createNewFile();
         val writer = new BufferedWriter(new FileWriter(s"docs/allInOne.html"))
         Velocity.mergeTemplate("templates/allInOne_header.vm", "utf-8", context, writer)
         buffer.foreach((entry) => {
@@ -256,7 +291,6 @@ object InnoxyzDoclet extends Doclet {
             val apis = entry._2
             context.put("namespace", namespace)
             context.put("apiHTMLs", apis)
-            val template = Velocity.getTemplate("templates/namespace.vm")
             Velocity.mergeTemplate("templates/namespace.vm", "utf-8", context, writer)
         })
         Velocity.mergeTemplate("templates/allInOne_footer.vm", "utf-8", context, writer)
@@ -276,23 +310,30 @@ object InnoxyzDoclet extends Doclet {
     def dataModelToJSON(clazz:Class[_ <: Object]):String = {
         val fields = getAllFields(clazz,Nil)
         val builder = new StringBuilder
+        var SEP=""
         builder.append("{")
-        fields.filter( f => !f.isAnnotationPresent(options.ac)).foreach( f =>
-            builder.append(s""" ${f.getName} : ${f.getType.getSimpleName} ,""")
-        )
+        fields.filter( f => !f.isAnnotationPresent(options.ac)).foreach{ f =>
+            builder.append(SEP)
+            SEP=","
+            builder.append(s""" ${f.getName} : ${f.getType.getSimpleName}""")
+        }
         builder.append("}")
         builder.toString()
     }
 }
 
-class ReturnElem(val name:String,val tp:String,val isArray:Boolean,val describe:String,val example:String){
-    def getName = name;
-    def getTp = tp;
-    def getIsArray = isArray;
-    def getDescribe = describe;
-    def getExample = example
+object ResultElem{
+    val tagName = "@result"
 }
 
+class ResultElem(val text:String){
+    def getText = text;
+}
+
+object ParamElem{
+    val requireName="@required"
+    val optionName= "@optional"
+}
 class ParamElem(val name: String, val tp: String, val required: Boolean, val describe: String) {
     def getName = name
 
@@ -303,6 +344,9 @@ class ParamElem(val name: String, val tp: String, val required: Boolean, val des
     def getDescribe = describe
 }
 
+object APIElem{
+    val tagName="@api"
+}
 class APIElem(val name: String, val fullPath: String, val describe: String,
               val block: String, val params: util.List[ParamElem]) {
     def getName = name

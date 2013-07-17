@@ -1,0 +1,13 @@
+-encoding
+utf-8
+-doclet
+com.innoxyz.javadoc.InnoxyzDoclet
+-private
+-sourcepath
+src\test\java
+-subpackages
+com.innoxyz.tests
+-rootpackage
+com.innoxyz.tests
+-ac
+com.innoxyz.others.NotExpose

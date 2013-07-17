@@ -12,7 +12,7 @@
     <!--<root level="INFO">-->
         <!--<appender-ref ref="STDOUT" />-->
     <!--</root>-->
-    <logger name="com.innoxyz" level = "DEBUG" >
+    <logger name="com.innoxyz" level = "INFO" >
         <appender-ref ref="STDOUT" />
     </logger>
 </configuration>
