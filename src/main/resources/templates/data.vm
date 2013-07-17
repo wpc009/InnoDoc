@@ -1,0 +1,5 @@
+{
+ #foreach( $field in $fields)
+	 $field.getName : $field.getType.getSimpleName
+ #end
+}

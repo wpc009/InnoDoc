@@ -16,10 +16,12 @@ public class TestDoc {
 	 * 3rd line blablablablabla
 	 *
 	 *
-	 * @api action designed to do something
+	 * @api
 	 * @required id blablablabla
 	 * @optional name blablablablalbla
-	 *
+	 * @return {
+	 *  data: @com.innoxyz.others.Data true 测试数据
+	 * }
 	 *
 	 */
 	@Action(input = "a",output="b")
@@ -27,8 +29,9 @@ public class TestDoc {
 
 	}
 
-	public static void main (String[] args){
+	public static void main (String[] args) throws Exception{
 		com.sun.tools.javadoc.Main.execute(args);
+//		Class c = Class.forName("com.innoxyz.others.NotExpose");
 
 	}
 }

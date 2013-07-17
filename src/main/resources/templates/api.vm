@@ -1,18 +1,42 @@
-#foreach ($api in $apis)
-<li id="api_$api.name">
-    <span>${api.name}</span>
-    <span>${api.fullPath}</span>
-	<div class="comment_block">
-		<p>
-		${api.block}
-        </p>
-	</div>
-    <ul class="params_list">
-		#foreach ( $param in ${api.params})
-            <li>
-				${param.name}:${param.tp} ${param.required}
-            </li>
-		#end
-    </ul>
-</li>
+#foreach ($apiEntry in $apiMap)
+<div>
+<span>namespace : $apiEntry.key</span>
+
+	#foreach( $api in $apiEntry.value)
+
+        <li id="api_$api.name">
+            <span>${api.name}</span>
+            <span>${api.fullPath}</span>
+
+            <div class="comment_block">
+                <p>
+					${api.block}
+                </p>
+            </div>
+            <ul class="params_list">
+				#foreach ( $param in ${api.params})
+                    <li>
+						${param.name}:${param.tp} ${param.required}
+                    </li>
+				#end
+            </ul>
+
+            <div class="returns_list">
+                <span>返回结果</span>
+                <ul class="returns_list">
+					#foreach( $return in $returns )
+                        <li>
+							$return.name : $return.tp , $return.isArray
+                            <span>
+								$return.describe
+                            </span>
+                            <span> $return.example</span>
+                        </li>
+					#end
+
+                </ul>
+            </div>
+        </li>
+    </div>
+	#end
 #end
