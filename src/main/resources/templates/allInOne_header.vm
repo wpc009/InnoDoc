@@ -1,4 +1,8 @@
 <html>
+<meta charset="UTF-8">
+<title>API Documents</title>
+<link rel="stylesheet" type="text/css" href="css/api.css" />
 <body>
-<strong>API Documents</strong>
+<div class="wraper_main">
+    <h1>API Documents</h1>
 

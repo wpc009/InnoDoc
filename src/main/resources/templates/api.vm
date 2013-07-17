@@ -1,36 +1,31 @@
 #foreach ($apiEntry in $apiMap)
-<div>
-<span>namespace : $apiEntry.key</span>
-
-	#foreach( $api in $apiEntry.value)
-
-        <li id="api_$api.name">
-            <span>${api.name}</span>
-            <span>${api.fullPath}</span>
+    #foreach( $api in $apiEntry.value)
+    <div>
+        <h2>namespace : $apiEntry.key</h2>
+            <h3>API name:${api.name}</h3>
+            <span class="apiFullPath">API full path:${api.fullPath}</span>
 
             <div class="comment_block">
-                <p>
-					${api.block}
-                </p>
+                    ${api.block}
             </div>
-            <ul class="params_list">
-				#foreach ( $param in ${api.params})
-                    <li>
-						${param.name}:${param.tp} ${param.required}
-                    </li>
-				#end
-            </ul>
+            <pre>
+                <code>
+                #foreach ( $param in ${api.params})
+                        ${param.name}:${param.tp} ${param.required}
+                #end
+                </code>
+            </pre>
 
             <div class="returns_list">
                 <span>返回结果</span>
                 <ul class="returns_list">
-					#foreach( $return in $returns )
+                    #foreach( $return in $returns )
                         <li>
                             <span>
 								$return.text
                             </span>
                         </li>
-					#end
+                    #end
 
                 </ul>
             </div>
@@ -38,3 +33,4 @@
 	#end
 </div>
 #end
+

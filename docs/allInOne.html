@@ -1,84 +1,70 @@
 <html>
+<meta charset="UTF-8">
+<title>API Documents</title>
+<link rel="stylesheet" type="text/css" href="css/api.css" />
 <body>
-<strong>API Documents</strong>
+<div class="wraper_main">
+    <h1>API Documents</h1>
 
-<div id="namespace_/">
-	<ul>
-					<div>
-<span>namespace : /</span>
-
-	
-        <li id="api_">
-            <span></span>
-            <span>/</span>
+            <div>
+        <h2>namespace : /</h2>
+            <h3>API name:</h3>
+            <span class="apiFullPath">API full path:/</span>
 
             <div class="comment_block">
-                <p>
-					comment blocks
- 2nd line
+                    comment blocks
+ This is My comments, and I need the comment is longer enough. No matter how you do this, we need the block is longer enough.
  3rd line blablablablabla
-                </p>
             </div>
-            <ul class="params_list">
-				                    <li>
-						id:Integer true
-                    </li>
-				                    <li>
-						name:String false
-                    </li>
-				            </ul>
+            <pre>
+                <code>
+                                        id:Integer true
+                                        name:String false
+                                </code>
+            </pre>
 
             <div class="returns_list">
                 <span>返回结果</span>
                 <ul class="returns_list">
-					                        <li>
-							data : @com.innoxyz.others.Data , true
+                                            <li>
                             <span>
-								测试数据
- 
+								{
+  data: { id : Integer, text : String} true 测试数据
+ }
                             </span>
-                            <span> { id : Integer , text : String ,}</span>
                         </li>
-					
+                    
                 </ul>
             </div>
         </li>
-    </div>
-	
-			</ul>
-</div><div id="namespace_/subpacks/">
-	<ul>
-					<div>
-<span>namespace : /subpacks/</span>
+	</div>
 
-	
-        <li id="api_test2">
-            <span>test2</span>
-            <span>/subpacks/test2</span>
+
+            <div>
+        <h2>namespace : /subpacks/</h2>
+            <h3>API name:test2</h3>
+            <span class="apiFullPath">API full path:/subpacks/test2</span>
 
             <div class="comment_block">
-                <p>
-					comment block
-                </p>
+                    comment block
             </div>
-            <ul class="params_list">
-				                    <li>
-						id:Integer true
-                    </li>
-				                    <li>
-						name:String false
-                    </li>
-				            </ul>
+            <pre>
+                <code>
+                                        id:Integer true
+                                        name:String false
+                                </code>
+            </pre>
 
             <div class="returns_list">
                 <span>返回结果</span>
                 <ul class="returns_list">
-					
+                    
                 </ul>
             </div>
         </li>
-    </div>
-	
-			</ul>
-</div></body>
+	</div>
+
+
+</div>
+</body>
 </html>

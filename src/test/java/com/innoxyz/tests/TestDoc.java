@@ -12,7 +12,7 @@ public class TestDoc {
 
 	/**
 	 * comment blocks
-	 * 2nd line
+	 * This is My comments, and I need the comment is longer enough. No matter how you do this, we need the block is longer enough.
 	 * 3rd line blablablablabla
 	 *
 	 *
