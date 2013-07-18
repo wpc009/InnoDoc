@@ -1,8 +1,52 @@
-<html>
+<!DOCTYPE html>
 <meta charset="UTF-8">
 <title>API Documents</title>
 <link rel="stylesheet" type="text/css" href="css/api.css" />
+<script src="js/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function(){
+
+        $(".symbol").click(function(){
+            var sym=$(this).text();
+            if(sym=="[+]"){
+                $(this).text("[-]");
+                $(".list").slideDown();
+
+            }
+            else{
+                $(this).text("[+]");
+                $(".list").slideUp();
+
+            }
+        });
+    });
+
+</script>
+
 <body>
+<h1>API Documents</h1>
+<a class="topMark" href="#content">返回目录</a>
 <div class="wraper_main">
-    <h1>API Documents</h1>
+    <div class="content">
+        <div class="title" id="content">
+            <span class="word">本文目录</span>
+            <span class="symbol">[+]</span>
+        </div>
+
+        <div class="list">
+        <ol>
+            #foreach($ns in ${apiAgenda.keySet()})
+                <li>
+                    $ns
+                    <ol>
+                     #foreach($apiName in ${apiAgenda.get($ns)})
+                        <a href="#$apiName"><li>$apiName</li></a>
+                    #end
+                    </ol>
+                </li>
+            #end
+        </ol>
+        </div>
+    </div>
+
 

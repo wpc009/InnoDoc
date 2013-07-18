@@ -20,7 +20,7 @@ public class TestDoc {
 	 * @required id blablablabla
 	 * @optional name blablablablalbla
 	 * @result {
-	 *  data: @com.innoxyz.others.Data true 测试数据
+	 *  data: @com.innoxyz.others.Data true
 	 * }
 	 *
 	 */

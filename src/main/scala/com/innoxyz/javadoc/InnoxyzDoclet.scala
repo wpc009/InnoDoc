@@ -26,6 +26,8 @@ object InnoxyzDoclet extends Doclet {
     val writer = System.out;
     val options: Options = new Options("",null)
     val buffer = new util.HashMap[String, util.ArrayList[String]]()
+
+    val apiCache = new util.HashMap[String,util.ArrayList[String]]()
     val validDocOps = Map[String, OptionDescriber](
         "-rootpackage" -> new OptionDescriber(2, options.rootPackage_),
         "-ac" -> new OptionDescriber(2, options.ac_),
@@ -130,7 +132,6 @@ object InnoxyzDoclet extends Doclet {
 
     def parseClass(doc: ClassDoc) {
         println(s"processing ${doc.qualifiedName()}")
-
         val filedsMap = new util.HashMap[String, String]
         var classDoc = doc;
         while(classDoc != null){
@@ -256,6 +257,9 @@ object InnoxyzDoclet extends Doclet {
 //                    }
                 })
                 apis += new APIElem(actionName, s"${namespace}${actionName}", api(0).text(), mDoc.commentText(), params,resultElems)
+                val apiList = apiCache.getOrElse(namespace,{val l=new util.ArrayList[String]();apiCache += namespace -> l ; l})
+                apiList += actionName
+
         }
         if(apis.length>0){
             val context = new VelocityContext
@@ -278,6 +282,12 @@ object InnoxyzDoclet extends Doclet {
         if(Files.notExists(folder))
             Files.createDirectories(folder)
         Files.copy(apiCssStream,folder.resolve("api.css"),StandardCopyOption.REPLACE_EXISTING)
+
+      val jsStream = getClass.getClassLoader.getResourceAsStream("js/jquery.min.js")
+      val jsFolder = options.outFolder.resolve("js")
+      if(Files.notExists(jsFolder))
+        Files.createDirectories(jsFolder)
+      Files.copy(jsStream,jsFolder.resolve("jquery.min.js"),StandardCopyOption.REPLACE_EXISTING)
     }
 
     def renderToSingleFile() {
@@ -285,7 +295,10 @@ object InnoxyzDoclet extends Doclet {
         if(Files.notExists(options.outFolder))Files.createDirectories(options.outFolder)
         val file = options.outFolder.resolve("allInOne.html")
         val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.toFile),options.encoding))
+        context.put("apiAgenda",apiCache)
         Velocity.mergeTemplate("templates/allInOne_header.vm", options.encoding, context, writer)
+
+
         buffer.foreach((entry) => {
             val namespace = entry._1
             val apis = entry._2

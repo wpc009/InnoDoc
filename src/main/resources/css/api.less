@@ -1,22 +1,23 @@
 body {
   font-size: 16px;
-  font-family: consolas,Courier New,Arial,verdana,Helvetica,sans-serif;;
+  font-family: "consolas","Courier New","Arial","verdana","Helvetica","sans-serif";
   word-wrap: break-word;
   word-break: normal;
   color: rgb(85, 85, 85);
 }
 h1{
   text-align: center;
+
 }
 
 h2
 {
-  background: none repeat scroll 0px 0px rgb(93, 180, 220);
+  background: none repeat scroll 0% 0% rgb(93, 180, 220);
   clear: both;
   color: rgb(0, 0, 0);
-  font-family: 'Courier New';
+  font-family: "Courier New";
   font-size: 20px;
-  margin: 5px 0px;
+  margin: 25px 0 0 0;
   padding: 6px 5px;
   line-height: 1.5;
   font-weight: bold;
@@ -24,26 +25,67 @@ h2
 h3{
   background: none repeat scroll 0% 0% rgb(47, 209, 203);
   color: rgb(0, 0, 0);
-  font-family: 'Courier New';
-  padding: 0px 20px;
+  font-family: "Courier New";
+  padding: 0 5px;
   font-weight: bold;
   font-size: 16px;
   line-height: 1.8;
+  margin: 25px 0 0 0;
 }
+h4{
+  margin:30px 0 0 0;
+}
+
 .wraper_main{
   width: 1000px;
-  margin: 0px auto 85px;
+  margin: 0 auto 85px;
+  padding:10px;
 
 }
-pre{
-  color: rgb(51, 50, 49);
-  background: none repeat scroll 0% 0% rgb(237, 236, 235);
-  padding: 5px 7px;
-  margin: 0px 0px 20px;
-  border-left: 2ex solid rgb(221, 221, 221);
-  text-align: justify;
+.content{
+  float:left;
+  background-color: #EEEEEE;
+  .title{
+    float:left;
+    width:100%;
+    .word{
+      font-weight: bold;
+      display: block;
+      float:left;
+    }
+    .symbol{
+      display: block;
+      float:right;
+      cursor: pointer;
+    }
+    .symbol:hover{
+      color: red;
+    }
+  }
+  .list{
+    float:left;
+    display: none;
+  }
 }
-code{
-  font-weight: normal;
-  color: rgb(35, 34, 33);
+
+.topMark{
+display: block;
+  position: fixed;
+  bottom: 35px;
+  right: 100px;
+  z-index: 1001;
+}
+.code_div{
+  border: 1pt solid #AEBDCC;
+  background-color: #F3F5F7;
+  padding: 5px;
+  font-family: "consolas", "monospace";
+  margin:10px 0;
+  text-align: left;
+  .code_span
+  {
+    display: block;
+    line-height: 1.5;
+
+  }
 }

@@ -1,6 +1,6 @@
 body {
   font-size: 16px;
-  font-family: consolas, Courier New, Arial, verdana, Helvetica, sans-serif;
+  font-family: "consolas", "Courier New", "Arial", "verdana", "Helvetica", "sans-serif";
   word-wrap: break-word;
   word-break: normal;
   color: #555555;
@@ -9,12 +9,12 @@ h1 {
   text-align: center;
 }
 h2 {
-  background: none repeat scroll 0px 0px #5db4dc;
+  background: none repeat scroll 0% 0% #5db4dc;
   clear: both;
   color: #000000;
-  font-family: 'Courier New';
+  font-family: "Courier New";
   font-size: 20px;
-  margin: 5px 0px;
+  margin: 25px 0 0 0;
   padding: 6px 5px;
   line-height: 1.5;
   font-weight: bold;
@@ -22,25 +22,62 @@ h2 {
 h3 {
   background: none repeat scroll 0% 0% #2fd1cb;
   color: #000000;
-  font-family: 'Courier New';
-  padding: 0px 20px;
+  font-family: "Courier New";
+  padding: 0 5px;
   font-weight: bold;
   font-size: 16px;
   line-height: 1.8;
+  margin: 25px 0 0 0;
+}
+h4 {
+  margin: 30px 0 0 0;
 }
 .wraper_main {
   width: 1000px;
-  margin: 0px auto 85px;
+  margin: 0 auto 85px;
+  padding: 10px;
 }
-pre {
-  color: #333231;
-  background: none repeat scroll 0% 0% #edeceb;
-  padding: 5px 7px;
-  margin: 0px 0px 20px;
-  border-left: 2ex solid #dddddd;
-  text-align: justify;
+.content {
+  float: left;
+  background-color: #EEEEEE;
 }
-code {
-  font-weight: normal;
-  color: #232221;
+.content .title {
+  float: left;
+  width: 100%;
+}
+.content .title .word {
+  font-weight: bold;
+  display: block;
+  float: left;
+}
+.content .title .symbol {
+  display: block;
+  float: right;
+  cursor: pointer;
+}
+.content .title .symbol:hover {
+  color: red;
+}
+.content .list {
+  float: left;
+  display: none;
+}
+.topMark {
+  display: block;
+  position: fixed;
+  bottom: 35px;
+  right: 100px;
+  z-index: 1001;
+}
+.code_div {
+  border: 1pt solid #AEBDCC;
+  background-color: #F3F5F7;
+  padding: 5px;
+  font-family: "consolas", "monospace";
+  margin: 10px 0;
+  text-align: left;
+}
+.code_div .code_span {
+  display: block;
+  line-height: 1.5;
 }

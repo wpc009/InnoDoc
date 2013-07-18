@@ -1,33 +1,32 @@
 #foreach( $api in $apis)
     <div id="${api.name}">
-            <h3>API name:${api.name}</h3>
-            <span class="apiFullPath">API full path:${api.fullPath}</span>
+            <h3>${api.name}</h3>
 
-            <div class="comment_block">
-                    ${api.block}
+            <h4>Full path</h4>
+            <div class="code_div">
+                <span class="code_span">${api.fullPath}</span>
             </div>
-            <pre>
-                <code>
+
+            <h4>Comments</h4>
+            <div class="code_div">
+                    <span class="code_span">${api.block}</span>
+            </div>
+            <h4>Parameters</h4>
+            <div class="code_div">
                 #foreach ( $param in ${api.params})
-                        ${param.name}:${param.tp} ${param.required}
+                        <span class="code_span">
+                            ${param.name}:${param.tp} #if(${param.required}) [<span style="color:#db7093">required</span>] #else [<span style="color:green">optional</span>] #end
+                        </span>
                 #end
-                </code>
-            </pre>
-
-            <div class="returns_list">
-                <span>返回结果</span>
-                <ul class="returns_list">
-                    #foreach( $result in ${api.results} )
-                        <li>
-                            <code>
-								$result.text
-                            </code>
-                        </li>
-                    #end
-
-                </ul>
             </div>
-        </li>
+            <h4>Return</h4>
+            <div class="code_div">
+                #foreach( $result in ${api.results} )
+                <span class="code_span">
+                        $result.text
+                </span>
+                #end
+            </div>
     </div>
 #end
 
