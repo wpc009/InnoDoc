@@ -1,3 +1,6 @@
+<div class="namespace">
+<h2>namespace : $namespace</h2>
 #foreach( $apiHTML in $apiHTMLs)
     $apiHTML
 #end
+</div>

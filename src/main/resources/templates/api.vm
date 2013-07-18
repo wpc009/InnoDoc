@@ -1,7 +1,5 @@
-#foreach ($apiEntry in $apiMap)
-    #foreach( $api in $apiEntry.value)
-    <div>
-        <h2>namespace : $apiEntry.key</h2>
+#foreach( $api in $apis)
+    <div id="${api.name}">
             <h3>API name:${api.name}</h3>
             <span class="apiFullPath">API full path:${api.fullPath}</span>
 
@@ -19,18 +17,18 @@
             <div class="returns_list">
                 <span>返回结果</span>
                 <ul class="returns_list">
-                    #foreach( $return in $returns )
+                    #foreach( $result in ${api.results} )
                         <li>
-                            <span>
-								$return.text
-                            </span>
+                            <code>
+								$result.text
+                            </code>
                         </li>
                     #end
 
                 </ul>
             </div>
         </li>
-	#end
-</div>
+    </div>
 #end
+
 

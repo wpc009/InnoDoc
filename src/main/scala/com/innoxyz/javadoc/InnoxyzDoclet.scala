@@ -14,6 +14,7 @@ import scala.beans.BeanProperty
 import java.lang.reflect.Field
 import java.lang.annotation.Annotation
 import java.net.URLClassLoader
+import java.nio.file.{StandardCopyOption, Files, Paths, Path}
 
 object InnoxyzDoclet extends Doclet {
 
@@ -21,13 +22,15 @@ object InnoxyzDoclet extends Doclet {
     val vproperties = new Properties()
     val logger = LoggerFactory.getLogger(getClass)
     val emptyTagArray = new Array[Tag](0)
-    val template = getClass.getClassLoader.getResource("templates/api.vm")
+//    val template = getClass.getClassLoader.getResource("templates/api.vm")
     val writer = System.out;
     val options: Options = new Options("",null)
     val buffer = new util.HashMap[String, util.ArrayList[String]]()
     val validDocOps = Map[String, OptionDescriber](
         "-rootpackage" -> new OptionDescriber(2, options.rootPackage_),
-        "-ac" -> new OptionDescriber(2, options.ac_)
+        "-ac" -> new OptionDescriber(2, options.ac_),
+        "-out" -> new OptionDescriber(2,options.out_),
+        "-encoding" -> new OptionDescriber(2,options.encoding_)
     )
 
     val dataModelCache = new util.HashMap[Class[_ <: Object],String]
@@ -62,7 +65,7 @@ object InnoxyzDoclet extends Doclet {
                     case e: Throwable =>
 //                        logger.error(e.getStackTrace.mkString("\n"))
                         e.printStackTrace()
-                        logger.error(s"wrong parameter format : ${key} -> $paramParts(1)")
+                        logger.error(s"wrong parameter format at ${}")
                         return false;
                 }
             }
@@ -114,6 +117,7 @@ object InnoxyzDoclet extends Doclet {
             }
         }
         renderToSingleFile()
+        copyResources()
         true
     }
 
@@ -139,8 +143,7 @@ object InnoxyzDoclet extends Doclet {
         }
 
         val apis = new util.ArrayList[APIElem]
-        val namespaceMap = new util.HashMap[String,util.ArrayList[APIElem]]()
-        val resultElems = new util.ArrayList[ResultElem]()
+//        val namespaceMap = new util.HashMap[String,util.ArrayList[APIElem]]()
         if (!doc.qualifiedName().startsWith(options.rootPackage)) {
             logger.error(s"wrong doc ${doc.qualifiedName()}")
             return
@@ -162,7 +165,7 @@ object InnoxyzDoclet extends Doclet {
         }) foreach {
             mDoc =>
                 val api = mDoc.tags(APIElem.tagName)
-
+                val resultElems = new util.ArrayList[ResultElem]()
                 val actionName = if (mDoc.annotations().length > 0 && mDoc.annotations()(0).annotationType()
                     .simpleTypeName()
                     == "Action") {
@@ -192,7 +195,7 @@ object InnoxyzDoclet extends Doclet {
                 }
                 val requires = Some(mDoc.tags(ParamElem.requireName))
                 val optionals = Some(mDoc.tags(ParamElem.optionName))
-                val returns = Some(mDoc.tags(ResultElem.tagName))
+                val results = Some(mDoc.tags(ResultElem.tagName))
                 val params: util.List[ParamElem] = new util.ArrayList[ParamElem]
 
                 val parseParam = (r: Tag, required: Boolean) => {
@@ -203,7 +206,7 @@ object InnoxyzDoclet extends Doclet {
                             val typeStr = filedsMap.get(name)
                             params += new ParamElem(name, typeStr, required, text)
                         case _ =>
-                            logger.error("wrong param tag format!")
+                            logger.error(s"wrong param tag format! at ${mDoc.position()}")
 
                     }
                 }
@@ -216,7 +219,7 @@ object InnoxyzDoclet extends Doclet {
                 val TypeFormat = """@((?:[\w]+[.])*[\w]+)""".r
 
 
-                returns.getOrElse(emptyTagArray).foreach( returnTag => {
+                results.getOrElse(emptyTagArray).foreach( returnTag => {
 
                     val text = TypeFormat.replaceAllIn(returnTag.text(), m =>{
                         logger.debug(s"groups:${m.groupCount}")
@@ -252,48 +255,47 @@ object InnoxyzDoclet extends Doclet {
 //                        resultElems += new ResultElem(r.group(1),r.group(2),r.group(3).toBoolean,r.group(4),sample)
 //                    }
                 })
-                namespaceMap.getOrElse(namespace, {
-                    val apilist = new util.ArrayList[APIElem]()
-                    namespaceMap.put(namespace,apilist)
-                    apilist
-                }) += new APIElem(actionName, s"${namespace}${actionName}", api(0).text(), mDoc.commentText(), params)
+                apis += new APIElem(actionName, s"${namespace}${actionName}", api(0).text(), mDoc.commentText(), params,resultElems)
         }
-        val context = new VelocityContext
+        if(apis.length>0){
+            val context = new VelocityContext
+            context.put("apis", apis)
+            val builder = new StringWriter()
+            Velocity.mergeTemplate("templates/api.vm", options.encoding, context, builder)
+            val array = buffer.getOrElse(namespace, {
+                val array = new util.ArrayList[String]();
+                buffer.put(namespace,
+                    array);
+                array
+            })
+            array += builder.toString
+        }
+    }
 
-        context.put("path", s"${namespace}")
-        context.put("apiMap", namespaceMap.entrySet())
-        context.put("returns",resultElems)
-        apis.foreach(api => println(s"${api.name}:${api.describe}"))
-        val builder = new StringWriter()
-        Velocity.mergeTemplate("templates/api.vm", "utf-8", context, builder)
-        val array = buffer.getOrElse(namespace, {
-            val array = new util.ArrayList[String]();
-            buffer.put(namespace,
-                array);
-            array
-        })
-        array += builder.toString
-        //        val outputFile = new File("docs\\" + doc.name() + ".html")
-        //        val bufferedWriter = new BufferedWriter(new FileWriter(outputFile))
-        //        bufferedWriter.write(builder.toString)
-        //        bufferedWriter.flush()
-        //        bufferedWriter.close()
+    def copyResources() {
+        val apiCssStream = getClass.getClassLoader.getResourceAsStream("css/api.css")
+        val folder = options.outFolder.resolve("css")
+        if(Files.notExists(folder))
+            Files.createDirectories(folder)
+        Files.copy(apiCssStream,folder.resolve("api.css"),StandardCopyOption.REPLACE_EXISTING)
     }
 
     def renderToSingleFile() {
         val context = new VelocityContext()
-        val file = new File("docs/allInOne.html")
-        if(!file.exists())file.createNewFile();
-        val writer = new BufferedWriter(new FileWriter(s"docs/allInOne.html"))
-        Velocity.mergeTemplate("templates/allInOne_header.vm", "utf-8", context, writer)
+        if(Files.notExists(options.outFolder))Files.createDirectories(options.outFolder)
+        val file = options.outFolder.resolve("allInOne.html")
+        val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.toFile),options.encoding))
+        Velocity.mergeTemplate("templates/allInOne_header.vm", options.encoding, context, writer)
         buffer.foreach((entry) => {
             val namespace = entry._1
             val apis = entry._2
-            context.put("namespace", namespace)
-            context.put("apiHTMLs", apis)
-            Velocity.mergeTemplate("templates/namespace.vm", "utf-8", context, writer)
+            if(apis.length>0){
+                context.put("namespace", namespace)
+                context.put("apiHTMLs", apis)
+                Velocity.mergeTemplate("templates/namespace.vm", options.encoding, context, writer)
+            }
         })
-        Velocity.mergeTemplate("templates/allInOne_footer.vm", "utf-8", context, writer)
+        Velocity.mergeTemplate("templates/allInOne_footer.vm", options.encoding, context, writer)
         writer.flush();
         writer.close();
     }
@@ -348,7 +350,7 @@ object APIElem{
     val tagName="@api"
 }
 class APIElem(val name: String, val fullPath: String, val describe: String,
-              val block: String, val params: util.List[ParamElem]) {
+              val block: String, val params: util.List[ParamElem],val results:util.List[ResultElem]) {
     def getName = name
 
     def getDescribe = describe
@@ -358,17 +360,29 @@ class APIElem(val name: String, val fullPath: String, val describe: String,
     def getFullPath = fullPath
 
     def getBlock = block
+
+    def getResults = results
 }
 
 class OptionDescriber(val length: Int, val setter: (String) => Unit)
 
 class Options(var rootPackage: String, var ac: Class[_ <: Annotation]) {
+    var outFolder:Path=Paths.get("docs")
+    var encoding : String ="utf-8"
     def rootPackage_ = (pack: String) => {
         rootPackage = pack
     }
 
     def ac_ = (acName: String) => {
         ac = Class.forName(acName).asInstanceOf[Class[_ <: Annotation]]
+    }
+
+    def out_ = (name:String) => {
+        outFolder = Paths.get(name)
+    }
+
+    def encoding_ = (e:String) =>{
+        this.encoding=e
     }
 
 }
