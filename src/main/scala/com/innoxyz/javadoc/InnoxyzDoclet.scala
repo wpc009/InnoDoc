@@ -199,13 +199,13 @@ object InnoxyzDoclet extends Doclet {
                 val results = Some(mDoc.tags(ResultElem.tagName))
                 val params: util.List[ParamElem] = new util.ArrayList[ParamElem]
 
-                val parseParam = (r: Tag, required: Boolean) => {
+                val parseParam = (r: Tag, required: Boolean, paramList:util.List[ParamElem]) => {
                     val text = r.text()
-                    val ParamSeg = """([\w]+)[\s]+(.*)""".r
+                    val ParamSeg = """([\w]+)(?:[\s]+)?(.*)""".r
                     text match {
-                        case ParamSeg(name, text) =>
+                        case ParamSeg(name, comments) =>
                             val typeStr = filedsMap.get(name)
-                            params += new ParamElem(name, typeStr, required, text)
+                            paramList += new ParamElem(name, typeStr, required, comments)
                         case _ =>
                             logger.error(s"wrong param tag format! at ${mDoc.position()}")
 
@@ -214,8 +214,8 @@ object InnoxyzDoclet extends Doclet {
 
 
 
-                requires.getOrElse(emptyTagArray).foreach(parseParam(_, true))
-                optionals.getOrElse(emptyTagArray).foreach(parseParam(_, false))
+                requires.getOrElse(emptyTagArray).foreach(parseParam(_, true,params))
+                optionals.getOrElse(emptyTagArray).foreach(parseParam(_, false,params))
 //                val ReturnsFormat = """[\s]*([\w]+)[\s]*:[\s]*([^, ]+) ([^, ]+) ([^,}]+)(?:,)?""".r
                 val TypeFormat = """@((?:[\w]+[.])*[\w]+)""".r
 
