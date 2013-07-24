@@ -21,11 +21,10 @@
             </div>
             <h4>Return</h4>
             <div class="code_div">
-                #foreach( $result in ${api.results} )
-                <span class="code_span">
-                        $result.text
-                </span>
+	            #foreach( $result in ${api.results} )
+                <pre>$result.text</pre>
                 #end
+
             </div>
     </div>
 #end
