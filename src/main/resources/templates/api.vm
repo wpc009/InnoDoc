@@ -1,5 +1,5 @@
 #foreach( $api in $apis)
-    <div id="${api.name}">
+    <div id="${api.fullPath}">
             <h3>${api.name}</h3>
 
             <h4>Full path</h4>
