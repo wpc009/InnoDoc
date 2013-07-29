@@ -299,6 +299,7 @@ object InnoxyzDoclet extends Doclet {
         val context = new VelocityContext()
         if(Files.notExists(options.outFolder))Files.createDirectories(options.outFolder)
         val file = options.outFolder.resolve("allInOne.html")
+        println(s"writing to ${file.toAbsolutePath.toString}")
         val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file.toFile),options.encoding))
         context.put("apiAgenda",apiCache)
         Velocity.mergeTemplate("templates/allInOne_header.vm", options.encoding, context, writer)
