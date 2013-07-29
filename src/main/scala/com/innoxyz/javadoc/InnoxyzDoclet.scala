@@ -27,7 +27,7 @@ object InnoxyzDoclet extends Doclet {
     val options: Options = new Options("",null)
     val buffer = new util.HashMap[String, util.ArrayList[String]]()
 
-    val apiCache = new util.HashMap[String,util.ArrayList[String]]()
+    val apiCache = new util.TreeMap[String,util.ArrayList[String]]()
     val validDocOps = Map[String, OptionDescriber](
         "-rootpackage" -> new OptionDescriber(2, options.rootPackage_),
         "-ac" -> new OptionDescriber(2, options.ac_),

@@ -35,7 +35,7 @@
 
         <div class="list">
         <ol>
-            #foreach($ns in ${apiAgenda.keySet()})
+            #foreach($ns in ${apiAgenda.descendingKeySet()})
                 <li>
                     $ns
                     <ol>
