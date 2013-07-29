@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.beans.BeanProperty
 import java.lang.reflect.Field
 import java.lang.annotation.Annotation
-import java.net.URLClassLoader
+import java.net.{URL, URLClassLoader}
 import java.nio.file.{StandardCopyOption, Files, Paths, Path}
 
 object InnoxyzDoclet extends Doclet {
@@ -32,10 +32,14 @@ object InnoxyzDoclet extends Doclet {
         "-rootpackage" -> new OptionDescriber(2, options.rootPackage_),
         "-ac" -> new OptionDescriber(2, options.ac_),
         "-out" -> new OptionDescriber(2,options.out_),
-        "-encoding" -> new OptionDescriber(2,options.encoding_)
+        "-encoding" -> new OptionDescriber(2,options.encoding_),
+        "-classpath" -> new OptionDescriber(2,options.classpath_)
+
     )
 
     val dataModelCache = new util.HashMap[Class[_ <: Object],String]
+
+
     def isPrimitiveClass(c:Class[_ <:Object]):Boolean = {
         if(classOf[Number].isAssignableFrom(c)||classOf[String].isAssignableFrom(c)||classOf[Boolean].isAssignableFrom(c))true
         else false
@@ -66,8 +70,9 @@ object InnoxyzDoclet extends Doclet {
                 } catch {
                     case e: Throwable =>
 //                        logger.error(e.getStackTrace.mkString("\n"))
-                        e.printStackTrace()
-                        logger.error(s"wrong parameter format at ${}")
+                        e.printStackTrace(System.err)
+                        logger.error(e.getMessage)
+                        logger.error(s"wrong parameter format :${key} -> ${paramParts(1)}")
                         return false;
                 }
             }
@@ -226,7 +231,7 @@ object InnoxyzDoclet extends Doclet {
                         logger.debug(s"groups:${m.groupCount}")
                         try{
                             val className = m.group(1)
-                            val clazz = Class.forName(className).asInstanceOf[Class[_ <: Object]]
+                            val clazz = options.loader.loadClass(className).asInstanceOf[Class[_ <: Object]]
                             if(isPrimitiveClass(clazz)){
                                 clazz.getSimpleName
                             }else
@@ -382,12 +387,16 @@ class OptionDescriber(val length: Int, val setter: (String) => Unit)
 class Options(var rootPackage: String, var ac: Class[_ <: Annotation]) {
     var outFolder:Path=Paths.get("docs")
     var encoding : String ="utf-8"
+    var classpath:Array[String] = Array()
+    var loader :URLClassLoader = null
     def rootPackage_ = (pack: String) => {
         rootPackage = pack
     }
 
     def ac_ = (acName: String) => {
-        ac = Class.forName(acName).asInstanceOf[Class[_ <: Annotation]]
+        val urls = classpath.map( url => new File(url).toURI.toURL)
+        loader = new URLClassLoader(urls,classOf[Doclet].getClassLoader)
+        ac = loader.loadClass(acName).asInstanceOf[Class[_ <: Annotation]]
     }
 
     def out_ = (name:String) => {
@@ -396,6 +405,10 @@ class Options(var rootPackage: String, var ac: Class[_ <: Annotation]) {
 
     def encoding_ = (e:String) =>{
         this.encoding=e
+    }
+
+    def classpath_ = (cp:String) =>{
+        this.classpath = cp.split(File.pathSeparator)
     }
 
 }
