@@ -40,7 +40,7 @@
                     $ns
                     <ol>
                      #foreach($apiName in ${apiAgenda.get($ns)})
-                        <a href="#$apiName"><li>$apiName</li></a>
+                        <a href="#$ns$apiName"><li>$apiName</li></a>
                     #end
                     </ol>
                 </li>
