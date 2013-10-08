@@ -16,6 +16,7 @@
                 #foreach ( $param in ${api.params})
                         <span class="code_span">
                             ${param.name}:${param.tp} #if(${param.required}) [<span style="color:#db7093">required</span>] #else [<span style="color:green">optional</span>] #end
+	                        <span style="color: #FFFFFF;background-color: #A0A0A0;">${param.describe}</span>
                         </span>
                 #end
             </div>

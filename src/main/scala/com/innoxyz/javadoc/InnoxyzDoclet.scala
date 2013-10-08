@@ -363,6 +363,7 @@ class ParamElem(val name: String, val tp: String, val required: Boolean, val des
     def getRequired = required
 
     def getDescribe = describe
+
 }
 
 object APIElem{
