@@ -1,5 +1,5 @@
-A sample for the Typesafe Stack (http://typesafe.com/stack).
+==What is InnoDoc==
+An customized java-doc generator, used for generating API documentation. Writing the api documentation like a java doc.
 
-Scala sample project using Scala and SBT.
-
-To run and test it use SBT invoke: 'sbt run'
+==Key words==
+<pre>@api</pre>
